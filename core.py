@@ -49,34 +49,20 @@ def appRunning(APP):
 # This will perform the actions
 def commandKeys(pressed):
 
-    # Debound multiple movement command from the server
-    multiple_commands = pressed.find("}{")
-    if multiple_commands != -1:
-        print('[MULTIPLE COMMANDS] This may work, this may not work\r\n')
-        for command in pressed.replace('}{', '}\n{').split("\n"):
-            commandKeys(command)
-        return
+    # # Debound multiple movement command from the server
+    # multiple_commands = pressed.find("}{")
+    # if multiple_commands != -1:
+    #     print('[MULTIPLE COMMANDS] This may work, this may not work\r\n')
+    #     for command in pressed.replace('}{', '}\n{').split("\n"):
+    #         commandKeys(command)
+    #     return
 
     # The dictionary with the commands and switches to be run
     defaults = {
-        'up':       ['xdotool', 'key', "Up"],
-        'down':     ['xdotool', 'key', "Down"],
-        'left':     ['xdotool', 'key', "Left"],
-        'right':    ['xdotool', 'key', "Right"],
         'ok':       ['xdotool', 'key', "KP_Enter"],
-        'play':     ['xdotool', 'key', "XF86AudioPlay"],
-        'info':     ['xdotool', 'key', 'Menu'],
-        'back':     ['xdotool', 'key', "Escape"],
-        'next':     ['xdotool', 'key', "XF86AudioNext"],
-        'prev':     ['xdotool', 'key', "XF86AudioPrev"],
-        'video':    [DEFAULT_VIDEO],
-        'stop':     ['xdotool', 'key', "XF86AudioStop"],
-        'music':    [DEFAULT_MUSIC],
         'vol-up':   ['xdotool', 'key', "XF86AudioRaiseVolume"],
         'vol-down': ['xdotool', 'key', "XF86AudioLowerVolume"],
         'click' :   ['xdotool', 'click', "1"],
-        'rclick' :  ['xdotool', 'click', "3"],
-        'clickclick' :  ['xdotool', 'click', "1"],
     }
 
     # Did we receive a JSON string?
@@ -85,21 +71,6 @@ def commandKeys(pressed):
 
         # Currently we are only concerned with moving the mouse
         if JSON['action'] == "mouse-move":
-
-            # If the positions is None in the case of duplicate commands, just exit early
-            if not JSON['x']:
-                return
-            if not JSON['y']:
-                return
-
-
-            # If the positions is null in the case of duplicate commands, just exit early
-            if JSON['x'] == "null":
-                return
-            if JSON['y'] == "null":
-                return
-
-
             # Handle negative values
             if JSON['x'] < 0 or JSON['y'] < 0:
                 mouseCommand = [
@@ -119,27 +90,6 @@ def commandKeys(pressed):
 
             # Dispatch the mouse move event
             xdotool(mouseCommand)
-
-
-    # Was the keypress valid? If so, run the relevant command
-    elif pressed == "power":
-        killApps()
-
-    elif pressed == "fullscreen":
-        xdotool(defaults['click'], True)
-        xdotool(defaults['click'], True)
-
-    # The media launchers are a bit different, we need to check that the application is not already fired up
-    elif pressed == "video" or pressed == "music":
-
-        # Check if it's already running, if not kill all other players listed in apps and open this one
-        if appRunning(str(defaults[pressed])) == False:
-            #killApps()
-            appLaunch(defaults[pressed], True)
-            print("Launching " + str(defaults[pressed]))
-        else:
-            print(str(defaults[pressed]) + " is already running")
-
     # Othewise lets check the action to be run, based on the key pressed
     elif pressed in defaults:
         print(defaults[pressed])
@@ -152,12 +102,5 @@ def commandKeys(pressed):
 # This little baby is what sends the command from the dictionary to the kernel to be processed.
 def xdotool(action, surpress=False):
     ps = subprocess.Popen(action)
-    if surpress == False:
-        print(action)
-
-# Applications should be done a bit differently
-def appLaunch(action, surpress=False):
-    FNULL = open('/dev/null', 'w')
-    ps = subprocess.Popen(action, shell=True, stderr=FNULL)
     if surpress == False:
         print(action)
