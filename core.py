@@ -67,8 +67,11 @@ def commandKeys(pressed):
 
     # Did we receive a JSON string?
     if is_json(pressed):
-        JSON = json.loads(pressed)
-
+        JSON = json.loads(pressed).decode("utf-8")
+        if JSON['x'] is None:
+            JSON['x'] = 4000
+        if JSON['y'] is None:
+            JSON['y'] = 400
         # Currently we are only concerned with moving the mouse
         if JSON['action'] == "mouse-move":
             # Handle negative values
